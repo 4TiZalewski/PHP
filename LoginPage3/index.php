@@ -80,7 +80,7 @@ if (
         if (file_exists("$users_path\\$login")) {
             $saved_password = file_get_contents("$users_path\\$login\\password.txt");
             if (password_verify($password, $saved_password)) {
-                echo "Zalogowano na użytkownika $login";
+                header("Location:galeria.php?login=$login");
             } else {
                 echo "Błędne hasło";
             }
@@ -106,7 +106,6 @@ if (
 </body>
 </html>
 <?php
-
 
 
 ?>
