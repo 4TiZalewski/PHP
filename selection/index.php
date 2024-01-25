@@ -56,8 +56,8 @@ if (
             background-color: red;
         }
 
-        label:focus {
-            border: 1px solid white;
+        img:has(+ input:checked) {
+            background-color: blue;
         }
     </style>
 </head>
@@ -82,8 +82,6 @@ function load_images(string $image_dir, string|null $selected) {
             continue;
         }
 
-        $path_info = pathinfo($file_path);
-
         $class = "";
         if ($selected == $file_path) {
             $class = "class=\"selected\"";
@@ -92,7 +90,7 @@ function load_images(string $image_dir, string|null $selected) {
         $img = <<<IMG
             <label for="image$id">
                 <img src="$image_dir/$file_path" $class alt="">
-                <input type="radio" name="image" id="image$id" value="$file_path">
+                <input type="radio" name="image" id="image$id" value="$file_path" hidden>
             </label>
         IMG;
 
