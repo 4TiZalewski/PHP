@@ -38,28 +38,32 @@ if (
     <?php
 
     class A {
+        private readonly int $id;
         public int $x = 0;
         static public int $y = 0;
-        static public int $INSTANCES = 0;
+        static public int $instances = 0;
+        static private int $s_last_used_id = 0;
 
         public function __construct(int $x, int $y) {
+            $this->id = self::$s_last_used_id += 1;
+
             $this->x = $x;
             self::$y = $y;
-            self::$INSTANCES += 1;
+            self::$instances += 1;
         }
 
         public function __destruct() {
-            self::$INSTANCES -= 1;
+            self::$instances -= 1;
         }
 
         public function __toString() {
             $y = self::$y;
-            $instances = self::$INSTANCES;
-            return "{ x = $this->x, y = $y, [liczba instancji: $instances ] }<br>";
+            $instances = self::$instances;
+            return "#$this->id{ x = $this->x, y = $y, [liczba instancji: $instances ] }<br>";
         }
 
         static public function fun() {
-            echo "{ y = $y }<br>";
+            echo "#$this->id{ y = $y }<br>";
         }
     }
 
@@ -75,6 +79,10 @@ if (
     unset($b);
 
     echo $a; // x = 3, y = 6
+
+    $c = new A(7, 9);
+
+    echo $c;
 
     ?>
     </div> 
