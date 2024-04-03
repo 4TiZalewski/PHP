@@ -44,9 +44,11 @@
     $result = mysqli_query($connection, $sql);
 
     if ($result->num_rows > 0) {
+        echo "<ol>";
         while ($row = $result->fetch_assoc()) {
-            echo $row['imię']." ".$row['nazwisko']." (".$row['id_osoby'].") tel. ".$row['nr_tel']."<br>";
+            echo "<li>".$row['imię']." ".$row['nazwisko']." (".$row['id_osoby'].") tel. ".$row['nr_tel']."</li>";
         }
+        echo "</ol>";
     } else {
         echo "Brak wyników";
     }
