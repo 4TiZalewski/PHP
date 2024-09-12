@@ -46,7 +46,12 @@ if (
             border: 1px solid white;
         }
 
+        td, th {
+            padding: 0.5rem;
+        }
+
         table {
+            margin-top: 2rem;
             border-collapse: collapse;
         }
     </style>
