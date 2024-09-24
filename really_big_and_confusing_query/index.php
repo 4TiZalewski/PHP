@@ -56,29 +56,50 @@ if (!$connection) {
             <th>Składniki</th>
         </tr>
         <?php
+            // $sql = "
+            //     SELECT
+            //         perfumy.rodzina_zapachow,
+            //         perfumy.id_perfum,
+            //         perfumy.cena,
+            //         perfumy.nazwa_p
+            //     FROM
+            //         perfumy
+            //     WHERE
+            //         (
+            //             perfumy.rodzina_zapachow,
+            //             perfumy.cena
+            //         ) IN(
+            //         SELECT
+            //             perfumy.rodzina_zapachow,
+            //             MIN(perfumy.cena)
+            //         FROM
+            //             perfumy
+            //         GROUP BY
+            //             perfumy.rodzina_zapachow
+            //     )
+            //     ORDER BY
+            //         perfumy.rodzina_zapachow;
+            // ";
+
             $sql = "
                 SELECT
-                    perfumy.rodzina_zapachow,
+                    perfumy.nazwa_p,
                     perfumy.id_perfum,
                     perfumy.cena,
-                    perfumy.nazwa_p
+                    perfumy.rodzina_zapachow
                 FROM
                     perfumy
-                WHERE
-                    (
-                        perfumy.rodzina_zapachow,
-                        perfumy.cena
-                    ) IN(
+                JOIN(
                     SELECT
-                        perfumy.rodzina_zapachow,
-                        MIN(perfumy.cena)
+                        perfumy.rodzina_zapachow AS rodzina,
+                        MIN(perfumy.cena) AS mincena
                     FROM
                         perfumy
                     GROUP BY
                         perfumy.rodzina_zapachow
-                )
-                ORDER BY
-                    perfumy.rodzina_zapachow;
+                ) AS d
+                ON
+                    rodzina = perfumy.rodzina_zapachow AND perfumy.cena = mincena;
             ";
 
             $result = mysqli_query($connection, $sql);

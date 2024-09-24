@@ -1,0 +1,23 @@
+<!DOCTYPE html>
+<html lang="pl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document</title>
+</head>
+<body>
+    <div class="container">
+        <form action="new_table.php">
+            <label for="name">
+                Nazwa tableli
+                <input type="text" name="name" id="name" required>
+            </label>
+            <label for="number_of_column">
+                Liczba kolumn
+                <input type="number" name="number_of_column" id="number_of_column" min="1" value="4" required>
+            </label>
+            <input type="submit" value="Utwórz">
+        </form>
+    </div>
+</body>
+</html>
