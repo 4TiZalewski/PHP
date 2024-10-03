@@ -1,0 +1,113 @@
+/* Szymon Zalewski */
+
+/* Kwerenda 1 */
+SELECT
+    COUNT(*) AS ilosc_mezczyzn
+FROM
+    klienci
+WHERE
+    klienci.Nazwisko LIKE "%a";
+
+/* Kwerenda 2 */
+SELECT
+    samochody.Miejscowosc,
+    COUNT(*) AS ilosc_samochodow
+FROM
+    samochody
+GROUP BY
+    samochody.Miejscowosc
+ORDER BY
+    ilosc_samochodow;
+
+/* Kwerenda 3 */
+SELECT
+    LEFT(samochody.Nr_firmowy, 1) AS klasa,
+    COUNT(*) AS ilosc_wypozyczen
+FROM
+    samochody
+GROUP BY
+    klasa;
+
+/* Kwerenda 4 */
+SELECT
+    samochody.Miejscowosc,
+    COUNT(*) AS ilosc_samochodow
+FROM
+    samochody
+LEFT JOIN wypozyczenia ON samochody.Nr_ew = wypozyczenia.Nr_ew
+WHERE
+    wypozyczenia.Wypozyczenie IS NULL
+GROUP BY
+    samochody.Miejscowosc;
+
+/* Kwerenda 5 */
+SELECT
+    FLOOR(SUM(d.pary)) AS ilosc_par
+FROM
+    (
+    SELECT
+        (COUNT(*) / 2) AS pary
+    FROM
+        klienci
+    GROUP BY
+        klienci.Imie,
+        LEFT(klienci.Nazwisko, 1)
+    HAVING
+        (pary * 2) % 2 = 0
+    ORDER BY
+        pary
+    DESC
+) AS d;
+
+/* Kwerenda 6 */
+
+Źle:
+SELECT
+    ceny_za_dobe.Klasa,
+    (
+        ceny_za_dobe.Cena * ilosc_samochodow_klas.dni
+    ) AS zarobek
+FROM
+    ceny_za_dobe
+JOIN(
+    SELECT
+        LEFT(samochody.Nr_firmowy, 1) AS Klasa,
+        SUM(
+            (
+                (
+                    MONTH(wypozyczenia.Zwrot) - MONTH(wypozyczenia.Wypozyczenie)
+                ) * 30 /* I know :( */ +(
+                    DAY(wypozyczenia.Zwrot) - DAY(wypozyczenia.Wypozyczenie)
+                )
+            )
+        ) AS dni
+    FROM
+        samochody
+    JOIN wypozyczenia USING(Nr_ew)
+    GROUP BY
+        Klasa
+) AS ilosc_samochodow_klas USING(Klasa);
+
+Poprawne: 
+
+SELECT
+    ceny_za_dobe.Klasa,
+    (
+        ceny_za_dobe.Cena * ilosc_samochodow_klas.dni
+    ) AS zarobek
+FROM
+    ceny_za_dobe
+JOIN(
+    SELECT
+        LEFT(samochody.Nr_firmowy, 1) AS Klasa,
+        SUM(
+            (
+                DATEDIFF(wypozyczenia.Zwrot, wypozyczenia.Wypozyczenie) + 1
+            )
+        ) AS dni
+    FROM
+        samochody
+    JOIN wypozyczenia USING(Nr_ew)
+    GROUP BY
+        Klasa
+) AS ilosc_samochodow_klas USING(Klasa);

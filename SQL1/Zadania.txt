@@ -1,0 +1,7 @@
+Skonstruuj (i prześlij jako rozwiązanie) kwerendy, znajdujące odpowiednie informacje.
+1. Ilu mężczyzn jest wśród klientów?
+2. Ile jest samochodów w poszczególnych miejscowościach? Zestawienie posortuj rosnąco według liczby samochodów.
+3. Dla każdej klasy samochodu podaj liczbę wypożyczeń samochodów tej klasy. Posortuj zestawienie malejąco według liczby wypożyczeń.
+4. Ile jest samochdów, które nie były wypożyczane. Podaj ich liczbę w podziale na miejscowości.
+5. Ile jest par różnych klientów, którzy mają takie samo imię i nazwisko zaczynające się na tę samą literę?
+6. Przygotuj zestawienie, zawierające sumaryczną kwotę dochodu z wypożyczeń samochodów z poszczególnych klas. Uwaga: np. dla daty wypożyczenia 2015-05-24 i daty zwrotu 2015-05-28 czas wypożyczenia to 4 doby.
