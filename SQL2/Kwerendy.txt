@@ -1,0 +1,102 @@
+SELECT
+    klienci.Imie,
+    klienci.Nazwisko
+FROM
+    klienci
+WHERE
+    klienci.Id_klienta IN(
+        (
+        SELECT
+            klienci.Id_klienta
+        FROM
+            klienci
+        JOIN zainteresowanie USING(Id_klienta)
+        JOIN oferty USING(Id_oferty)
+        WHERE
+            oferty.Id_oferty LIKE "%M_"
+        GROUP BY
+            klienci.Id_klienta
+        ORDER BY
+            klienci.Nazwisko
+    ) INTERSECT(
+    SELECT
+        klienci.Id_klienta
+    FROM
+        klienci
+    JOIN zainteresowanie USING(Id_klienta)
+    JOIN oferty USING(Id_oferty)
+    WHERE
+        oferty.Id_oferty LIKE "%D_"
+    GROUP BY
+        klienci.Id_klienta
+    ORDER BY
+        klienci.Nazwisko
+)
+    )
+
+
+SELECT
+    klienci.Imie,
+    klienci.Nazwisko,
+    COUNT(
+        CASE WHEN LEFT(RIGHT(oferty.Id_oferty, 2),
+        1) = "M" THEN 1 ELSE NULL
+    END
+    ),
+    COUNT(
+        CASE WHEN LEFT(RIGHT(oferty.Id_oferty, 2),
+        1) = "D" THEN 1 ELSE NULL
+    END
+)
+FROM
+    klienci
+JOIN zainteresowanie USING(Id_klienta)
+JOIN oferty USING(Id_oferty)
+GROUP BY
+    klienci.Id_klienta;
+
+
+SELECT
+    agenci.Imie,
+    agenci.Nazwisko,
+    "agent" AS "rola"
+FROM
+    agenci
+UNION ALL
+SELECT
+    klienci.Imie,
+    klienci.Nazwisko,
+    "klient" AS "rola"
+FROM
+    klienci;
+
+
+SELECT
+    klienci.Imie,
+    klienci.Nazwisko
+FROM
+    klienci
+WHERE
+    klienci.Id_klienta NOT IN(
+    SELECT
+        zainteresowanie.Id_klienta
+    FROM
+        zainteresowanie
+    JOIN oferty USING(Id_oferty)
+    WHERE
+        oferty.Id_oferty LIKE "%MT"
+    GROUP BY
+        zainteresowanie.Id_klienta
+);
+
+
+SELECT
+    klienci.Imie,
+    klienci.Nazwisko
+FROM
+    klienci
+JOIN zainteresowanie USING(Id_klienta)
+JOIN oferty USING(Id_oferty)
+JOIN agenci USING(Id_agenta)
+WHERE
+    LEFT(klienci.Nazwisko, 1) = LEFT(agenci.Nazwisko, 1);
