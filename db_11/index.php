@@ -2,26 +2,33 @@
 
 $conn = mysqli_connect("127.0.0.1", "root", "", "5ti_gr1_filmy");
 
+$now = date_create();
+$now = date_format($now, "Y-m-d");
+
 if (
     isset($_POST['movie']) && 
     trim($_POST['movie']) != "" && 
     isset($_POST['client']) && 
-    trim($_POST['client']) != ""
+    trim($_POST['client']) != "" &&
+    isset($_POST['date']) &&
+    trim($_POST['date']) != ""
 ) {
     $movie_id = trim($_POST['movie']);
     $client = trim($_POST['client']);
+    $date = trim($_POST['date']);
+    $verified = date_create_from_format("Y-m-d", $date);
 
-    $now = date_create();
-    $now = date_format($now, "Y-m-d");
+    if ($verified) {
+        $verified_format = date_format($verified, "Y-m-d");
+        $sql = "INSERT INTO wyporzyczenia (Data_wyp, ID_filmu, Pesel) VALUES (?, ?, ?);";
 
-    $sql = "INSERT INTO wyporzyczenia (Data_wyp, ID_filmu, Pesel) VALUES (\"$now\", ?, ?);";
+        $stmt = mysqli_prepare($conn, $sql);
+        mysqli_stmt_bind_param($stmt, "sss", $verified_format, $movie_id, $client);
+        mysqli_stmt_execute($stmt);
 
-    $stmt = mysqli_prepare($conn, $sql);
-    mysqli_stmt_bind_param($stmt, "ss", $movie_id, $client);
-    mysqli_stmt_execute($stmt);
-
-    header("Location: index.php");
-    die();
+        header("Location: index.php");
+        die();
+    }
 }
 
 ?>
@@ -59,6 +66,10 @@ if (
             margin: 1rem;
             border-collapse: collapse;
         }
+
+        th, td {
+            padding: 0.3rem;
+        }
     </style>
 </head>
 <body>
@@ -94,6 +105,7 @@ if (
                     ?>
                 </select>
             </label>
+            <input type="date" value="<?php echo "$now"; ?>" name="date">
             <input type="submit" value="Dodaj">
         </form>
         <table>
