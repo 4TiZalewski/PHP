@@ -1,0 +1,117 @@
+SELECT
+    klienci.Imie,
+    klienci.Nazwisko,
+    COUNT(*) AS liczba_wypozyczen
+FROM
+    wyporzyczenia
+JOIN klienci USING(Pesel)
+WHERE
+    klienci.Pesel
+GROUP BY
+    klienci.Pesel
+ORDER BY
+    liczba_wypozyczen
+DESC;
+
+
+SELECT wyporzyczenia.ID_filmu
+FROM wyporzyczenia
+WHERE wyporzyczenia.Pesel = 89122589754;
+
+
+SELECT DISTINCT
+    klienci.Imie,
+    klienci.Nazwisko
+FROM
+    wyporzyczenia
+JOIN klienci USING(Pesel)
+WHERE
+    wyporzyczenia.ID_filmu IN(
+    SELECT
+        wyporzyczenia.ID_filmu
+    FROM
+        wyporzyczenia
+    WHERE
+        wyporzyczenia.Pesel = 89122589754
+);
+
+
+
+SELECT
+    klienci.Imie,
+    klienci.Nazwisko,
+    SUM(filmy.Cena_w_zl) AS wydatek
+FROM
+    wyporzyczenia
+JOIN klienci USING(Pesel)
+JOIN filmy USING(ID_filmu)
+WHERE
+    wyporzyczenia.Pesel REGEXP ".{9}[13579]."
+GROUP BY
+    klienci.Pesel
+HAVING
+    wydatek > ALL(
+    SELECT
+        SUM(filmy.Cena_w_zl)
+    FROM
+        wyporzyczenia
+    JOIN klienci USING(Pesel)
+    JOIN filmy USING(ID_filmu)
+    WHERE
+        wyporzyczenia.Pesel REGEXP ".{9}[02468]."
+    GROUP BY
+        klienci.Pesel
+);
+
+
+
+SELECT
+    filmy.Tytul
+FROM
+    filmy
+WHERE
+    filmy.ID_filmu = ANY(
+    SELECT
+        wyporzyczenia.ID_filmu
+    FROM
+        wyporzyczenia
+    WHERE
+        wyporzyczenia.Pesel REGEXP ".{9}[13579]."
+);
+
+
+
+SELECT
+    osoby.imie,
+    osoby.nazwisko,
+    SUM(konta.dostepne_srodki) AS srodki
+FROM
+    konta
+JOIN osoby USING(id_osoby)
+GROUP BY
+    konta.id_osoby
+HAVING
+    srodki > ALL(
+    SELECT
+        SUM(konta.dostepne_srodki)
+    FROM
+        konta
+    JOIN osoby USING(id_osoby)
+    WHERE
+        konta.id_osoby IN(
+        SELECT DISTINCT
+            konta.id_osoby
+        FROM
+            konta
+        WHERE
+            konta.bank LIKE "Credi%"
+    )
+GROUP BY
+    konta.id_osoby
+);
+
+
+UPDATE test SET test.srodki = 0 WHERE test.srodki > (SELECT AVG(test.srodki) FROM test);
+
+
+UPDATE test SET test.srodki = test.srodki + FLOOR(RAND()*11+10);
