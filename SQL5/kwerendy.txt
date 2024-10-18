@@ -1,0 +1,198 @@
+SELECT
+    kraj,
+    COUNT(*) AS liczba_graczy
+FROM
+    gracze
+WHERE
+    data_dolaczenia LIKE "2018%"
+GROUP BY
+    kraj
+ORDER BY
+    liczba_graczy
+DESC
+LIMIT 5;
+
+
+
+SELECT
+    klasy.nazwa,
+    SUM(klasy.strzal)
+FROM
+    klasy
+JOIN jednostki USING(nazwa)
+WHERE
+    klasy.nazwa LIKE "%elf%"
+GROUP BY
+    klasy.nazwa;
+
+
+
+SELECT
+    gracze.id_gracza
+FROM
+    gracze
+WHERE
+    gracze.id_gracza NOT IN(
+    SELECT
+        gracze.id_gracza
+    FROM
+        gracze
+    JOIN jednostki USING(id_gracza)
+    WHERE
+        jednostki.nazwa LIKE "%artylerzysta%"
+    GROUP BY
+        gracze.id_gracza
+);
+
+
+
+SELECT
+    gracze.id_gracza
+FROM
+    gracze
+WHERE
+    gracze.id_gracza <> ALL (
+    SELECT
+        gracze.id_gracza
+    FROM
+        gracze
+    JOIN jednostki USING(id_gracza)
+    WHERE
+        jednostki.nazwa LIKE "%artylerzysta%"
+    GROUP BY
+        gracze.id_gracza
+);
+
+
+
+SELECT
+    gracze.id_gracza
+FROM
+    gracze EXCEPT
+SELECT
+    gracze.id_gracza
+FROM
+    gracze
+JOIN jednostki USING(id_gracza)
+WHERE
+    jednostki.nazwa LIKE "%artylerzysta%"
+GROUP BY
+    gracze.id_gracza;
+
+
+
+SELECT
+    gracze.id_gracza
+FROM
+    gracze
+LEFT JOIN(
+    SELECT gracze.id_gracza
+    FROM
+        gracze
+    JOIN jednostki USING(id_gracza)
+    WHERE
+        jednostki.nazwa LIKE "%artylerzysta%"
+    GROUP BY
+        gracze.id_gracza
+) AS pom
+ON
+    gracze.id_gracza = pom.id_gracza
+WHERE
+    pom.id_gracza IS NULL;
+
+
+
+
+SELECT
+    jednostki.nazwa,
+    COUNT(*) AS liczba_jednostek
+FROM
+    jednostki
+JOIN klasy USING(nazwa)
+WHERE
+    (
+        ABS(jednostki.lok_x - 100) + ABS(jednostki.lok_y - 100)
+    ) <= klasy.szybkosc
+GROUP BY
+    jednostki.nazwa;
+
+
+
+SELECT
+    SUM(a.bitwy) AS ilosc_bitew
+FROM
+    (
+    SELECT
+        COUNT(*) > 1 AS bitwy
+    FROM
+        (
+        SELECT
+            jednostki.lok_x,
+            jednostki.lok_y
+        FROM
+            jednostki
+        GROUP BY
+            jednostki.lok_x,
+            jednostki.lok_y,
+            jednostki.id_gracza
+    ) AS d
+GROUP BY
+    d.lok_x,
+    d.lok_y
+) AS a;
+
+
+
+
+SELECT
+    COUNT(*) AS ilosc_polakow
+FROM
+    (
+    SELECT
+        a.lok_x,
+        a.lok_y
+    FROM
+        (
+        SELECT
+            d.lok_x,
+            d.lok_y
+        FROM
+            (
+            SELECT
+                jednostki.lok_x,
+                jednostki.lok_y
+            FROM
+                jednostki
+            GROUP BY
+                jednostki.lok_x,
+                jednostki.lok_y,
+                jednostki.id_gracza
+        ) AS d
+    GROUP BY
+        d.lok_x,
+        d.lok_y
+    HAVING
+        COUNT(*) > 1
+    ) AS a
+JOIN jednostki ON jednostki.lok_x = a.lok_x AND jednostki.lok_y = a.lok_y
+JOIN gracze USING(id_gracza)
+WHERE
+    gracze.kraj = "Polska"
+GROUP BY
+    a.lok_x,
+    a.lok_y
+) AS C;
+
+
+
+SELECT
+    jednostki.id_gracza,
+    SUM(klasy.sila) AS moc
+FROM
+    jednostki
+JOIN klasy USING(nazwa)
+GROUP BY
+    jednostki.id_gracza
+ORDER BY
+    moc
+DESC;
