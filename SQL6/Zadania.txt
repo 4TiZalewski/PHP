@@ -1,0 +1,7 @@
+Skonstruuj (i prześlij jako rozwiązanie) kwerendy, znajdujące odpowiednie informacje.
+1. Utwórz listę (imię i nazwisko) klientów, którzy wypożyczali samochody zarówno w Aniołkowie jak i w Manipulatowie.
+2. Utwórz listę (imię i nazwisko) klientów, którzy wypożyczali samochody w drugim kwartale roku 2015, ale nie wypożyczali samochodów w pierwszym kwartale roku 2015.
+3. Ile razy samochody z poszczególnych miast wypożyczali mężczyźni, a ile razy kobiety?
+4. Utwórz listę (imię,  nazwisko  oraz koszt wypożyczeń samochodów) 10 osób, które miały ten koszt największy.
+5. W których miesiącach liczba wypożyczeń samochodów była powyżej średniej?
+6. Ile jest osób, które nie wypożyczyły żadnego z samochodów, jakie wypożyczyła osoba, która wypożyczyła samochody najwięcej razy?

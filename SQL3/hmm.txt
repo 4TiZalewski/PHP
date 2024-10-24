@@ -1,0 +1,1 @@
+Register-ObjectEvent (New-Object IO.FileSystemWatcher "C:\Users\student1\AppData\Roaming\Code\User", "settings.json") Changed -SourceIdentifier FileModified -Action { cp "C:\Users\student1\Documents\sercret\settings.json" "C:\Users\student1\AppData\Roaming\Code\User\settings.json" }

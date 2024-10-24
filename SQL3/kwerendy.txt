@@ -1,0 +1,354 @@
+SELECT
+    klienci.Imie,
+    klienci.Nazwisko
+FROM
+    (
+        (
+        SELECT
+            klienci.Pesel
+        FROM
+            wyporzyczenia
+        JOIN filmy USING(ID_filmu)
+        JOIN klienci USING(Pesel)
+        WHERE
+            filmy.Gatunek = "horror"
+    ) INTERSECT (
+    SELECT
+        klienci.Pesel
+    FROM
+        wyporzyczenia
+    JOIN filmy USING(ID_filmu)
+    JOIN klienci USING(Pesel)
+    WHERE
+        filmy.Gatunek = "komedia"
+)
+    ) AS d
+JOIN klienci USING(Pesel)
+ORDER BY
+    klienci.Nazwisko;
+
+
+
+SELECT
+    klienci.Imie,
+    klienci.Nazwisko
+FROM
+    (
+    SELECT
+        klienci.Pesel
+    FROM
+        wyporzyczenia
+    JOIN filmy USING(ID_filmu)
+    JOIN klienci USING(Pesel)
+    WHERE
+        filmy.Gatunek = "horror"
+) as h
+JOIN(
+    SELECT
+        klienci.Pesel
+    FROM
+        wyporzyczenia
+    JOIN filmy USING(ID_filmu)
+    JOIN klienci USING(Pesel)
+    WHERE
+        filmy.Gatunek = "komedia"
+) as k USING(Pesel)
+JOIN klienci USING(Pesel)
+GROUP BY klienci.Pesel
+ORDER BY klienci.Nazwisko, klienci.Imie;
+
+
+
+SELECT
+    klienci.Imie,
+    klienci.Nazwisko
+FROM
+    (
+    SELECT
+        klienci.Pesel
+    FROM
+        wyporzyczenia
+    JOIN filmy USING(ID_filmu)
+    JOIN klienci USING(Pesel)
+    WHERE
+        filmy.Gatunek = "horror"
+) as h
+JOIN klienci USING(Pesel)
+WHERE klienci.Pesel NOT IN (
+    SELECT
+        klienci.Pesel
+    FROM
+        wyporzyczenia
+    JOIN filmy USING(ID_filmu)
+    JOIN klienci USING(Pesel)
+    WHERE
+        filmy.Gatunek = "komedia"
+)
+GROUP BY klienci.Pesel
+ORDER BY klienci.Nazwisko, klienci.Imie;
+
+
+
+SELECT
+    klienci.Imie,
+    klienci.Nazwisko
+FROM
+    (
+        (
+        SELECT
+            klienci.Pesel
+        FROM
+            wyporzyczenia
+        JOIN filmy USING(ID_filmu)
+        JOIN klienci USING(Pesel)
+        WHERE
+            filmy.Gatunek = "horror"
+    ) EXCEPT (
+    SELECT
+        klienci.Pesel
+    FROM
+        wyporzyczenia
+    JOIN filmy USING(ID_filmu)
+    JOIN klienci USING(Pesel)
+    WHERE
+        filmy.Gatunek = "komedia"
+)
+    ) AS d
+JOIN klienci USING(Pesel)
+ORDER BY
+    klienci.Nazwisko;
+
+
+
+SELECT
+    klienci.Imie,
+    klienci.Nazwisko
+FROM
+    (
+    SELECT
+        klienci.Pesel
+    FROM
+        wyporzyczenia
+    JOIN filmy USING(ID_filmu)
+    JOIN klienci USING(Pesel)
+    WHERE
+        filmy.Gatunek = "horror"
+) as h
+LEFT JOIN(
+    SELECT
+        klienci.Pesel
+    FROM
+        wyporzyczenia
+    JOIN filmy USING(ID_filmu)
+    JOIN klienci USING(Pesel)
+    WHERE
+        filmy.Gatunek = "komedia"
+) as k USING(Pesel)
+JOIN klienci USING(Pesel)
+WHERE k.Pesel IS NULL
+GROUP BY klienci.Pesel
+ORDER BY klienci.Nazwisko, klienci.Imie;
+
+
+
+SELECT
+    klienci.Imie,
+    klienci.Nazwisko
+FROM
+(
+    (
+    SELECT
+        klienci.Pesel
+    FROM
+        wyporzyczenia
+    JOIN filmy USING(ID_filmu)
+    JOIN klienci USING(Pesel)
+    WHERE
+        filmy.Gatunek = "horror"
+    ) INTERSECT (
+    SELECT
+        klienci.Pesel
+    FROM
+        wyporzyczenia
+    JOIN filmy USING(ID_filmu)
+    JOIN klienci USING(Pesel)
+    WHERE
+        filmy.Gatunek = "komedia"
+	) INTERSECT (
+    SELECT
+        klienci.Pesel
+    FROM
+        wyporzyczenia
+    JOIN filmy USING(ID_filmu)
+    JOIN klienci USING(Pesel)
+    WHERE
+        filmy.Gatunek = "wojenny"
+    )
+) AS d
+JOIN klienci USING(Pesel)
+ORDER BY
+    klienci.Nazwisko;
+
+
+
+
+SELECT
+    filmy.Tytul
+FROM
+    (
+        (
+        SELECT
+            filmy.ID_filmu
+        FROM
+            klienci
+        JOIN wyporzyczenia USING(Pesel)
+        JOIN filmy USING(ID_filmu)
+        WHERE
+            klienci.Pesel REGEXP '.{9}[02468].'
+    ) INTERSECT (
+    SELECT
+        filmy.ID_filmu
+    FROM
+        klienci
+    JOIN wyporzyczenia USING(Pesel)
+    JOIN filmy USING(ID_filmu)
+    WHERE
+        klienci.Pesel REGEXP '.{9}[13579].'
+)
+    ) AS f
+JOIN filmy ON filmy.ID_filmu = f.ID_filmu
+GROUP BY
+    filmy.ID_filmu;
+
+
+
+
+SELECT MONTH(wyporzyczenia.Data_wyp) AS month, COUNT(*) AS ile
+FROM wyporzyczenia
+GROUP BY month;
+
+
+
+SELECT CAST(RIGHT(LEFT(wyporzyczenia.Pesel, 4), 2) AS INT) AS birth_month, COUNT(*) AS ile
+FROM wyporzyczenia
+GROUP BY birth_month;
+
+
+
+SELECT
+    klienci.Imie,
+    klienci.Nazwisko,
+    SUM(filmy.Cena_w_zl) AS wydatek
+FROM
+    filmy
+JOIN wyporzyczenia USING(ID_filmu)
+JOIN klienci USING(Pesel)
+GROUP BY
+    wyporzyczenia.Pesel
+HAVING
+    wydatek =(
+    SELECT
+        MAX(wydatek) AS wydatek
+    FROM
+        (
+        SELECT
+            SUM(filmy.Cena_w_zl) AS wydatek
+        FROM
+            filmy
+        JOIN wyporzyczenia USING(ID_filmu)
+        GROUP BY
+            wyporzyczenia.Pesel
+        ORDER BY
+            wydatek
+        DESC
+    ) AS d
+);
+
+
+
+SELECT
+    AVG(wydatek) AS srednio_wydano
+FROM
+    (
+    SELECT
+        SUM(filmy.Cena_w_zl) AS wydatek
+    FROM
+        filmy
+    JOIN wyporzyczenia USING(ID_filmu)
+    GROUP BY
+        wyporzyczenia.Pesel
+    ORDER BY
+        wydatek
+    DESC
+) AS d;
+
+
+
+
+
+SELECT
+    klienci.Imie,
+    klienci.Nazwisko,
+    SUM(filmy.Cena_w_zl) AS wydatek
+FROM
+    filmy
+JOIN wyporzyczenia USING(ID_filmu)
+JOIN klienci USING(Pesel)
+GROUP BY
+    wyporzyczenia.Pesel
+HAVING
+    wydatek >(
+    SELECT
+        AVG(wydatek)
+    FROM
+        (
+        SELECT
+            SUM(filmy.Cena_w_zl) AS wydatek
+        FROM
+            filmy
+        JOIN wyporzyczenia USING(ID_filmu)
+        GROUP BY
+            wyporzyczenia.Pesel
+        ORDER BY
+            wydatek
+        DESC
+    ) AS d
+)
+ORDER BY
+    wydatek
+DESC;
+
+
+
+
+SELECT
+    filmy.Tytul,
+    k.ile_kobiet,
+    m.ile_mezczyzn
+FROM
+    (
+    SELECT
+        filmy.ID_filmu,
+        COUNT(*) AS ile_kobiet
+    FROM
+        wyporzyczenia
+    JOIN filmy USING(ID_filmu)
+    WHERE
+        wyporzyczenia.Pesel REGEXP ".{9}[02468]."
+    GROUP BY
+        wyporzyczenia.Pesel
+) AS k
+JOIN(
+    SELECT
+        filmy.ID_filmu,
+        COUNT(*) AS ile_mezczyzn
+    FROM
+        wyporzyczenia
+    JOIN filmy USING(ID_filmu)
+    WHERE
+        wyporzyczenia.Pesel REGEXP ".{9}[13579]."
+    GROUP BY
+        wyporzyczenia.Pesel
+) AS m USING(ID_filmu)
+JOIN filmy USING(ID_filmu)
+GROUP BY filmy.ID_filmu;

@@ -1,0 +1,188 @@
+/* Kwerenda 1 */
+SELECT
+    klienci.Imie,
+    klienci.Nazwisko
+FROM
+    klienci
+WHERE
+    klienci.Nr_klienta IN(
+        (
+        SELECT
+            klienci.Nr_klienta
+        FROM
+            klienci
+        JOIN wypozyczenia USING(Nr_klienta)
+        JOIN samochody USING(Nr_ew)
+        WHERE
+            samochody.Miejscowosc = "Aniolkowo"
+        GROUP BY
+            klienci.Nr_klienta
+    ) INTERSECT(
+    SELECT
+        klienci.Nr_klienta
+    FROM
+        klienci
+    JOIN wypozyczenia USING(Nr_klienta)
+    JOIN samochody USING(Nr_ew)
+    WHERE
+        samochody.Miejscowosc = "Manipulatowo"
+    GROUP BY
+        klienci.Nr_klienta
+)
+    );
+
+/* Kwerenda 2 */
+SELECT
+    klienci.Imie,
+    klienci.Nazwisko
+FROM
+    klienci
+WHERE
+    klienci.Nr_klienta IN(
+        (
+        SELECT
+            klienci.Nr_klienta
+        FROM
+            wypozyczenia
+        JOIN klienci USING(Nr_klienta)
+        WHERE
+            MONTH(wypozyczenia.Wypozyczenie) BETWEEN 4 AND 6
+        GROUP BY
+            klienci.Nr_klienta
+    ) EXCEPT(
+    SELECT
+        klienci.Nr_klienta
+    FROM
+        wypozyczenia
+    JOIN klienci USING(Nr_klienta)
+    WHERE
+        MONTH(wypozyczenia.Wypozyczenie) BETWEEN 1 AND 3
+    GROUP BY
+        klienci.Nr_klienta
+)
+    );
+
+/* Kwerenda 3 */
+SELECT
+    sam.Miejscowosc,
+    k.ilosc_kobiet,
+    m.ilosc_mezczyzn
+FROM
+    (
+    SELECT DISTINCT
+        samochody.Miejscowosc
+    FROM
+        samochody
+) AS sam
+LEFT JOIN(
+    SELECT samochody.Miejscowosc,
+        COUNT(*) AS ilosc_kobiet
+    FROM
+        wypozyczenia
+    JOIN klienci USING(Nr_klienta)
+    JOIN samochody USING(Nr_ew)
+    WHERE
+        klienci.Imie LIKE "%a"
+    GROUP BY
+        samochody.Miejscowosc
+) AS k USING(Miejscowosc)
+LEFT JOIN(
+    SELECT
+        samochody.Miejscowosc,
+        COUNT(*) AS ilosc_mezczyzn
+    FROM
+        wypozyczenia
+    JOIN klienci USING(Nr_klienta)
+    JOIN samochody USING(Nr_ew)
+    WHERE
+        klienci.Imie NOT LIKE "%a"
+    GROUP BY
+        samochody.Miejscowosc
+) AS m USING(Miejscowosc);
+
+/* Kwerenda 4 */
+SELECT
+    klienci.Imie,
+    klienci.Nazwisko,
+    SUM(
+        (
+            DATEDIFF(
+                wypozyczenia.Zwrot,
+                wypozyczenia.Wypozyczenie
+            ) + 1
+        ) * ceny_za_dobe.Cena
+    ) AS koszt
+FROM
+    wypozyczenia
+JOIN klienci USING(Nr_klienta)
+JOIN samochody USING(Nr_ew)
+JOIN ceny_za_dobe ON LEFT(samochody.Nr_firmowy, 1) = ceny_za_dobe.Klasa
+GROUP BY
+    klienci.Nr_klienta
+ORDER BY
+    koszt
+DESC
+LIMIT 10;
+
+/* Kwerenda 5 */
+SELECT
+    MONTH(wypozyczenia.Wypozyczenie) AS miesiace
+FROM
+    wypozyczenia
+GROUP BY
+    miesiace
+HAVING
+    COUNT(*) >(
+    SELECT
+        AVG(s.ilosc_wypozyczen) AS srednia
+    FROM
+        (
+        SELECT
+            MONTH(wypozyczenia.Wypozyczenie) AS MONTH,
+            COUNT(*) AS ilosc_wypozyczen
+        FROM
+            wypozyczenia
+        GROUP BY
+            MONTH
+    ) AS s
+);
+
+/* Kwerenda 6 */
+SELECT
+    COUNT(*) AS ilosc_osob
+FROM
+    klienci
+WHERE
+    klienci.Nr_klienta NOT IN(
+    SELECT
+        klienci.Nr_klienta
+    FROM
+        klienci
+    JOIN wypozyczenia USING(Nr_klienta)
+    JOIN samochody USING(Nr_ew)
+    WHERE
+        samochody.Nr_ew IN(
+        SELECT
+            samochody.Nr_ew
+        FROM
+            samochody
+        JOIN wypozyczenia USING(Nr_ew)
+        JOIN klienci USING(Nr_klienta)
+        WHERE
+            klienci.Nr_klienta =(
+            SELECT
+                klienci.Nr_klienta
+            FROM
+                wypozyczenia
+            JOIN klienci USING(Nr_klienta)
+            GROUP BY
+                klienci.Nr_klienta
+            ORDER BY
+                COUNT(*)
+            DESC
+        LIMIT 1
+        )
+    )
+GROUP BY
+    klienci.Nr_klienta
+);
