@@ -1,0 +1,175 @@
+SET @srednia = (SELECT AVG(srodki) FROM test);
+SELECT @srednia;
+
+
+SET @srednia = (SELECT AVG(srodki) FROM test);
+(SELECT test.imie, test.nazwisko, test.srodki, "powyzej średniej"
+FROM test
+WHERE test.srodki > @srednia)
+UNION
+(SELECT test.imie, test.nazwisko, test.srodki, "poniżej średniej"
+FROM test
+WHERE test.srodki > @srednia);
+
+
+SET
+    @srednia =(
+    SELECT
+        AVG(ilosc_wypozyczen)
+    FROM
+        (
+        SELECT
+            COUNT(*) AS ilosc_wypozyczen
+        FROM
+            wypozyczenia
+        GROUP BY
+            MONTH(wypozyczenia.Wypozyczenie)
+    ) AS pom
+);
+SELECT
+    MONTH(wypozyczenia.Wypozyczenie) AS miesiac,
+    COUNT(*) AS ile
+FROM
+    wypozyczenia
+GROUP BY
+    miesiac
+HAVING
+    ile > @srednia;
+
+
+SELECT *
+FROM mecze
+WHERE mecze.Sety_wygrane + mecze.Sety_przegrane = 5;
+
+
+SELECT
+    kluby.Miasto,
+    COUNT(*) AS mecze
+FROM
+    mecze
+JOIN kluby USING(Id_klubu)
+GROUP BY
+    kluby.Miasto
+ORDER BY
+    mecze
+DESC;
+
+
+SET
+    @srednia =(
+    SELECT
+        AVG(ile_sedziowal)
+    FROM
+        (
+        SELECT
+            COUNT(*) AS ile_sedziowal
+        FROM
+            mecze
+        GROUP BY
+            mecze.Id_sedziego
+    ) AS pom
+);
+SELECT
+    sedziowie.Imie,
+    sedziowie.Nazwisko
+FROM
+    mecze
+JOIN sedziowie USING(Id_sedziego)
+GROUP BY
+    mecze.Id_sedziego
+HAVING
+    COUNT(*) > @srednia
+ORDER BY
+    sedziowie.Nazwisko;
+
+
+SELECT
+    sedziowie.Imie,
+    sedziowie.Nazwisko
+FROM
+    sedziowie
+WHERE
+    sedziowie.Id_sedziego NOT IN(
+    SELECT
+        mecze.Id_sedziego
+    FROM
+        mecze
+    JOIN kluby USING(Id_klubu)
+    WHERE
+        mecze.Data BETWEEN "2019-10-15" AND "2019-12-15" AND(
+            kluby.Miasto = "Licowo" OR kluby.Miasto = "Szymbark"
+        )
+);
+
+
+SELECT
+    kluby.Nazwa,
+    kluby.Miasto,
+    wygrane.wygrane,
+    przegrane.przegrane
+FROM
+    (
+    SELECT
+        kluby.Id_klubu,
+        COUNT(*) AS wygrane
+    FROM
+        kluby
+    JOIN mecze USING(Id_klubu)
+    WHERE
+        mecze.Sety_wygrane > mecze.Sety_przegrane
+    GROUP BY
+        kluby.Id_klubu
+) AS wygrane
+JOIN(
+    SELECT
+        kluby.Id_klubu,
+        COUNT(*) AS przegrane
+    FROM
+        kluby
+    JOIN mecze USING(Id_klubu)
+    WHERE
+        mecze.Sety_wygrane < mecze.Sety_przegrane
+    GROUP BY
+        kluby.Id_klubu
+) AS przegrane USING(Id_klubu)
+JOIN kluby USING(Id_klubu)
+WHERE
+    wygrane.wygrane >= przegrane.przegrane;
+
+
+SELECT
+    kluby.Nazwa,
+    kluby.Miasto,
+    SUM(
+        mecze.Sety_wygrane > mecze.Sety_przegrane
+    ) AS wygrane,
+    SUM(
+        mecze.Sety_wygrane < mecze.Sety_przegrane
+    ) AS przegrane
+FROM
+    kluby
+JOIN mecze USING(Id_klubu)
+GROUP BY
+    kluby.Id_klubu
+HAVING wygrane >= przegrane;
+
+
+SELECT
+    kluby.Nazwa,
+    kluby.Miasto,
+    SUM(
+        CASE 
+        	WHEN mecze.Sety_przegrane > 2 THEN 3 
+        	WHEN mecze.Sety_przegrane = 2 THEN 2 
+        	WHEN mecze.Sety_wygrane = 2 THEN 1 
+        ELSE 0
+    END
+) AS punkty
+FROM
+    mecze
+JOIN kluby USING(Id_klubu)
+GROUP BY
+    mecze.Id_klubu
+ORDER BY
+    punkty
+DESC;
