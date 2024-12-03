@@ -1,0 +1,81 @@
+<!DOCTYPE html>
+<html lang="pl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Neon</title>
+    <link rel="stylesheet" href="styl.css">
+</head>
+<body>
+    <div class="container">
+        <header class="baner">
+            <img src="./baner.png" alt="grafika z logiem">
+        </header>
+        <main>
+            <div class="gorny">
+                <p>Egzamin</p>
+            </div>
+            <div class="dolny">
+                <div class="lewy">
+                    <label for="tresc">
+                        Treść neonu
+                        <input type="text" id="tresc" maxlength="10">
+                    </label>
+                    <button id="button" onclick="onClick()">Zastosuj</button>
+                </div>
+                <div class="srodkowy">
+                    <label>
+                        Kolor neonu
+                        <br>
+                        <label for="red">
+                            R
+                            <input type="range" min="0" max="255" value="255" id="red" oninput="colorChange()">
+                        </label>
+                        <br>
+                        <label for="green">
+                            G
+                            <input type="range" min="0" max="255" value="0" id="green" oninput="colorChange()">
+                        </label>
+                        <br>
+                        <label for="blue">
+                            B
+                            <input type="range" min="0" max="255" value="0" id="blue" oninput="colorChange()">
+                        </label>
+                    </label>
+                </div>
+                <div class="prawy">
+                    <label for="size">
+                        Rozmiar neonu
+                        <input type="number" min="0" max="300" value="100" step="5" id="size" onchange="fontSize()">
+                    </label>
+                </div>
+            </div>
+        </main>
+        <footer class="stopka">
+            <p><a href="styl.css" target="_blank">Otwórz plik ze stylami css</a></p>
+            <p>Stronę wykonał: 00000000000</p>
+        </footer>
+    </div> 
+    <script>
+        const button = document.querySelector("#button");
+        const display = document.querySelector(".gorny p");
+
+        function onClick() {
+            const tresc = document.querySelector("#tresc");
+            display.innerHTML = tresc.value;
+        }
+
+        function colorChange() {
+            const red = document.querySelector("#red").value;
+            const green = document.querySelector("#green").value;
+            const blue = document.querySelector("#blue").value;
+            display.style.color = `rgb(${red}, ${green}, ${blue})`;
+        }
+
+        function fontSize() {
+            const size = document.querySelector("#size").value;
+            display.style.fontSize = `${size}px`;
+        }
+    </script>
+</body>
+</html>

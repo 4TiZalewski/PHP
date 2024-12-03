@@ -1,0 +1,39 @@
+/* zap 1 */
+SELECT DISTINCT dane.imie FROM dane WHERE dane.plec = "k";
+
+/* zap 2 */
+SELECT
+    dane.imie,
+    SUM(dane.liczebnosc) AS powtorzenia
+FROM
+    dane
+WHERE
+    dane.plec = "m"
+GROUP BY
+    dane.imie
+ORDER BY
+    powtorzenia
+DESC
+LIMIT 5;
+
+/* zap 3 */
+SELECT
+    dane.imie,
+    dane.liczebnosc
+FROM
+    dane
+JOIN wojewodztwa ON dane.id_woj = wojewodztwa.id
+WHERE
+    wojewodztwa.nazwa = "Mazowieckie"
+ORDER BY
+    dane.liczebnosc
+DESC
+LIMIT 1;
+
+/* zap 4 */
+SELECT DISTINCT
+    dane.imie
+FROM
+    dane
+WHERE
+    dane.imie LIKE "___";
